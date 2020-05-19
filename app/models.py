@@ -27,8 +27,8 @@ class Staff(models.Model):
 class Schedule(models.Model):
     staff = models.ForeignKey(Staff, verbose_name='スタッフ', on_delete=models.CASCADE)
     name = models.CharField('予約者名', max_length=255)
-    start = models.DateTimeField('開始時間')
-    end = models.DateTimeField('終了時間')
+    start = models.DateTimeField('開始時間', default=timezone.now)
+    end = models.DateTimeField('終了時間', default=timezone.now)
 
     def __str__(self):
         return self.name

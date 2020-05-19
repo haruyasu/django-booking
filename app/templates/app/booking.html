@@ -1,0 +1,17 @@
+{% extends "app/base.html" %}
+
+{% block content %}
+
+<div class="my-5">
+    <h1>Hello World!!</h1>
+</div>
+
+<h1>{{ staff.store.name }}店 {{ staff.name }}</h1>
+<p>{{ view.kwargs.year }}年{{ view.kwargs.month }}月{{ view.kwargs.day }}日 {{ view.kwargs.hour }}時に予約</p>
+<form action="" method="POST">
+    {{ form.as_p }}
+    {% csrf_token %}
+    <button type="submit">送信</button>
+</form>
+
+{% endblock %}
