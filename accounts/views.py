@@ -4,6 +4,8 @@ from accounts.models import CustomUser
 from accounts.forms import ProfileForm, SignupUserForm
 from django.shortcuts import render, redirect
 from allauth.account import views
+from app.models import Staff, Schedule
+from django.utils import timezone
 
 
 class SignupView(views.SignupView):
@@ -27,9 +29,13 @@ class LogoutView(views.LogoutView):
 class ProfileView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         user_data = CustomUser.objects.get(id=request.user.id)
+        staff_data = Staff.objects.filter(user=self.request.user).order_by('name')
+        schedule_data = Schedule.objects.filter(staff__user=self.request.user, start__gte=timezone.now()).order_by('name')
 
         return render(request, 'accounts/profile.html', {
             'user_data': user_data,
+            'staff_data': staff_data,
+            'schedule_data': schedule_data,
         })
 
 
