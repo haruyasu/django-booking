@@ -1,0 +1,18 @@
+{% extends "app/base.html" %}
+
+{% block content %}
+
+<div class="my-5">
+    <h1>Hello World!!</h1>
+</div>
+
+<h1>{{ store.name }}店 スタッフ一覧</h1>
+<ul>
+    {% for staff in staff_list %}
+        <li><a href="">{{ staff.name }}</a></li>
+    {% empty %}
+        <li>まだスタッフがいません。</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
