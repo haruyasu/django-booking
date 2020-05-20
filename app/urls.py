@@ -5,10 +5,12 @@ urlpatterns = [
     path('', views.StoreView.as_view(), name='store'),
     path('store/<int:pk>/', views.StaffView.as_view(), name='staff'),
 
-    path('staff/<int:pk>/calendar/', views.StaffCalendar.as_view(), name='calendar'),
-    path('staff/<int:pk>/calendar/<int:year>/<int:month>/<int:day>/', views.StaffCalendar.as_view(), name='calendar'),
+    path('calendar/<int:pk>/', views.CalendarView.as_view(), name='calendar'),
+    path('calendar/<int:pk>/<int:year>/<int:month>/<int:day>/', views.CalendarView.as_view(), name='calendar'),
+    path('booking/<int:pk>/<int:year>/<int:month>/<int:day>/<int:hour>/', views.BookingView.as_view(), name='booking'),
 
-    path('staff/<int:pk>/booking/<int:year>/<int:month>/<int:day>/<int:hour>/', views.Booking.as_view(), name='booking'),
+
+
 
     path('mypage/<int:pk>/calendar/', views.MyPageCalendar.as_view(), name='my_page_calendar'),
     path('mypage/<int:pk>/calendar/<int:year>/<int:month>/<int:day>/', views.MyPageCalendar.as_view(), name='my_page_calendar'),

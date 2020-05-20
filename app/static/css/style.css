@@ -112,3 +112,8 @@ main {
     height: 250px;
     object-fit: contain;
 }
+
+.calender img {
+    height: 150px;
+    object-fit: contain;
+}

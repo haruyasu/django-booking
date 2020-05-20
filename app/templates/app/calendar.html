@@ -2,50 +2,77 @@
 
 {% block content %}
 
-<h3>店舗：{{ staff.store.name }}店</h3>
-<h4>スタッフ：{{ staff.name }}</h4>
-<p>{{ start_day }} - {{ end_day }}</p>
+<div class="text-center my-5">
+    <div class="row">
+        <div class="col-md-6 mb-4 text-center calender">
+            <img src="/{{ staff_data.person.image.url }}" class="img-fluid" alt="">
+        </div>
 
-<table class="table table-bordered text-center" style="table-layout: fixed;width: 100%" border="1">
-    <tr>
-        <td><a href="{% url 'calendar' staff.pk before.year before.month before.day %}">前週</a></td>
-        {% for day in days %}
-            {% if day in public_holidays %}
-                <th style="background-color: yellow">{{ day | date:"d(D)" }}</th>
-            {% elif day.weekday == 5 %}
-                <th style="color: blue;">{{ day | date:"d(D)" }}</th>
-            {% elif day.weekday == 6 %}
-                <th style="color: red;">{{ day | date:"d(D)" }}</th>
-            {% else %}
-                <th>{{ day | date:"d(D)" }}</th>
-            {% endif %}
-        {% endfor %}
-        <td><a href="{% url 'calendar' staff.pk next.year next.month next.day %}">次週</a></td>
-    </tr>
+        <div class="col-md-6 mb-5">
+            <div class="card">
+                <div class="card-body px-2 py-1">
+                    <div class="p-4 text-left">
+                        <h3>{{ staff_data.person.name }}</h3>
+                        <hr>
+                        <p>店舗：{{ staff_data.store.name }}店</p>
+                        <p>{{ staff_data.person.description|linebreaksbr }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    {% for hour, schedules in calendar.items %}
-        <tr style="font-size:12px">
-            <td>
-                {{ hour }}:00
-            </td>
-            {% for dt, book in schedules.items %}
-                <td>
-                    {% if dt <= today %}
-                        -
-                    {% elif book %}
-                        <a href="{% url 'booking' staff.pk dt.year dt.month dt.day hour %}">○</a>
-                    {% else %}
-                        ×
-                    {% endif %}
-                </td>
+    <div class="mb-3">
+        <h2>予約カレンダー</h2>
+        <p>{{ start_day }}～{{ end_day }}</p>
+    </div>
 
-            {% endfor %}
-            <td>
-                {{ hour }}:00
-            </td>
-        </tr>
-    {% endfor %}
-
-</table>
+    <div class="d-flex mb-2">
+        <div class="mx-3 mr-auto">
+            <a class="btn btn-warning" href="{% url 'calendar' staff_data.pk before.year before.month before.day %}">前週</a>
+        </div>
+        <div class="mx-3">
+            <a class="btn btn-warning" href="{% url 'calendar' staff_data.pk next.year next.month next.day %}">次週</a>
+        </div>
+    </div>
+    <div class="">
+        <table class="table table-bordered bg-light">
+            <thead class="thead-light">
+                <tr>
+                    <th></th>
+                    {% for day in days %}
+                        {% if day.weekday == 5 %}
+                            <th scope="col" class="text-primary">{{ day | date:"d(D)" }}</th>
+                        {% elif day.weekday == 6 %}
+                            <th scope="col" class="text-danger">{{ day | date:"d(D)" }}</th>
+                        {% else %}
+                            <th scope="col">{{ day | date:"d(D)" }}</th>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for hour, schedules in calendar.items %}
+                    <tr>
+                        <td scope="row">{{ hour }}:00</td>
+                        {% for datetime, book in schedules.items %}
+                            <td>
+                                {% if datetime <= today %}
+                                    -
+                                {% elif book %}
+                                    <a href="{% url 'booking' staff_data.pk datetime.year datetime.month datetime.day hour %}">
+                                        <i class="far fa-circle text-info"></i>
+                                    </a>
+                                {% else %}
+                                    <i class="far fa-times-circle text-danger"></i>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
 {% endblock %}
