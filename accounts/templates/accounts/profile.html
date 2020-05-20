@@ -23,7 +23,7 @@
                     <th class="header">所属店舗</th>
                     <td class="data">
                         {% for staff in staff_data %}
-                            <p>{{ staff.store.name }}</p>
+                            <p><a href="{% url 'my_page_calendar' staff.pk %}">{{ staff.store.name }}</a></p>
                         {% empty %}
                             <p>所属がありません</p>
                         {% endfor %}
@@ -33,7 +33,7 @@
                     <th class="header">予約</th>
                     <td class="data">
                         {% for schedule in schedule_data %}
-                            <p>{{ schedule.name }}：{{ schedule.start }}～{{ schedule.end }}</p>
+                            <p><a href="{% url 'my_page_schedule' schedule.pk %}">{{ schedule.name }}：{{ schedule.start }}～{{ schedule.end }}</a></p>
                         {% empty %}
                             <p>予約がありません</p>
                         {% endfor %}

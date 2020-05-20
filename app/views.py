@@ -7,6 +7,9 @@ from django.views import generic
 from .models import Store, Staff, Schedule
 from django.contrib import messages
 from django.utils.timezone import make_aware
+from django.urls import reverse_lazy
+from django.core.exceptions import PermissionDenied
+from django.views.decorators.http import require_POST
 
 
 class StoreList(generic.ListView):
@@ -76,8 +79,8 @@ class StaffCalendar(generic.TemplateView):
                 row[day] = True
             calendar[hour] = row
 
-        start_time = datetime.combine(start_day, time(hour=9, minute=0))
-        end_time = datetime.combine(end_day, time(hour=17, minute=0))
+        start_time = datetime.combine(start_day, time(hour=9, minute=0, second=0))
+        end_time = datetime.combine(end_day, time(hour=17, minute=0, second=0))
         schedule_data = Schedule.objects.filter(staff=staff).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
 
         for schedule in schedule_data:
@@ -127,3 +130,62 @@ class Booking(generic.CreateView):
             schedule.end = end
             schedule.save()
         return redirect('calendar', pk=staff.pk, year=year, month=month, day=day)
+
+
+class MyPageCalendar(StaffCalendar):
+    template_name = 'app/mycalendar.html'
+
+
+class MyPageDayDetail(generic.TemplateView):
+    template_name = 'app/detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        pk = self.kwargs['pk']
+        staff = get_object_or_404(Staff, pk=pk)
+        year = self.kwargs.get('year')
+        month = self.kwargs.get('month')
+        day = self.kwargs.get('day')
+        base_date = date(year=year, month=month, day=day)
+
+        calendar = {}
+        for hour in range(9, 18):
+            calendar[hour] = []
+
+        start_time = datetime.combine(base_date, time(hour=9, minute=0, second=0))
+        end_time = datetime.combine(base_date, time(hour=17, minute=0, second=0))
+        schedule_data = Schedule.objects.filter(staff=staff).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
+        for schedule in schedule_data:
+            local_dt = timezone.localtime(schedule.start)
+            booking_date = local_dt.date()
+            booking_hour = local_dt.hour
+            if booking_hour in calendar:
+                calendar[booking_hour].append(schedule)
+
+        context['calendar'] = calendar
+        context['staff'] = staff
+        return context
+
+
+class MyPageSchedule(generic.UpdateView):
+    model = Schedule
+    fields = ('start', 'end', 'name')
+    success_url = reverse_lazy('profile')
+    template_name = 'app/schedule.html' 
+
+
+class MyPageScheduleDelete(generic.DeleteView):
+    model = Schedule
+    success_url = reverse_lazy('profile')
+
+
+@require_POST
+def my_page_holiday_add(request, pk, year, month, day, hour):
+    staff = get_object_or_404(Staff, pk=pk)
+    if staff.user == request.user or request.user.is_superuser:
+        start = datetime(year=year, month=month, day=day, hour=hour)
+        end = datetime(year=year, month=month, day=day, hour=hour + 1)
+        Schedule.objects.create(staff=staff, start=start, end=end, name='休暇')
+        return redirect('my_page_day_detail', pk=pk, year=year, month=month, day=day)
+
+    raise PermissionDenied
