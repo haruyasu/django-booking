@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views import generic
+from django.views.generic import View
 from .models import Store, Staff, Schedule
 from django.contrib import messages
 from django.utils.timezone import make_aware
@@ -12,43 +13,24 @@ from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
 
 
-class StoreList(generic.ListView):
-    model = Store
-    ordering = 'name'
-    template_name = "app/store.html"
-
+class StoreView(View):
     def get(self, request, *args, **kwargs):
-        # 店が1つの場合->スタッフ画面
-        store_list = Store.objects.all()
-        if store_list.count() == 1:
-            store = store_list.first()
-            return redirect('staff_list', pk=store.pk)
-        return super().get(request, *args, **kwargs)
+        store_data = Store.objects.all()
+
+        return render(request, 'app/store.html', {
+            'store_data': store_data,
+        })
 
 
-class StaffList(generic.ListView):
-    model = Staff
-    ordering = 'name'
-    template_name = "app/staff.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['store'] = self.store
-        return context
-
-    def get_queryset(self):
-        store = self.store = get_object_or_404(Store, pk=self.kwargs['pk'])
-        queryset = super().get_queryset().filter(store=store)
-        return queryset
-
+class StaffView(View):
     def get(self, request, *args, **kwargs):
-        # スタッフが1人の場合->カレンダー画面
-        store = get_object_or_404(Store, pk=self.kwargs['pk'])
-        staff_list = Staff.objects.filter(store=store)
-        if staff_list.count() == 1:
-            staff = staff_list.first()
-            return redirect('calendar', pk=staff.pk)
-        return super().get(request, *args, **kwargs)
+        store_data = get_object_or_404(Store, id=self.kwargs['pk'])
+        staff_data = Staff.objects.filter(store=store_data)
+
+        return render(request, 'app/staff.html', {
+            'store_data': store_data,
+            'staff_data': staff_data,
+        })
 
 
 class StaffCalendar(generic.TemplateView):

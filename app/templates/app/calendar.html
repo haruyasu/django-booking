@@ -2,13 +2,10 @@
 
 {% block content %}
 
-<div class="my-5">
-    <h1>Hello World!!</h1>
-</div>
-
-
-<h1>{{ staff.store.name }}店 {{ staff.name }}</h1>
+<h3>店舗：{{ staff.store.name }}店</h3>
+<h4>スタッフ：{{ staff.name }}</h4>
 <p>{{ start_day }} - {{ end_day }}</p>
+
 <table class="table table-bordered text-center" style="table-layout: fixed;width: 100%" border="1">
     <tr>
         <td><a href="{% url 'calendar' staff.pk before.year before.month before.day %}">前週</a></td>

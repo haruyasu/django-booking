@@ -2,17 +2,26 @@
 
 {% block content %}
 
-<div class="my-5">
-    <h1>Hello World!!</h1>
+<div class="text-center my-5">
+    <div class="mb-5">
+        <h1>店舗一覧</h1>
+    </div>
+    <div class="row">
+        {% for store in store_data %}
+            <div class="col-lg-3 col-md-6">
+                <div class="card img-thumbnail storelist mb-3">
+                    <img class="card-img-top card-thum" src="/{{ store.image.url }}" alt="">
+                    <div class="card-body text-center px-2 py-3">
+                        <h5 class="font-weight-bold">{{ store.name }}店</h5>
+                        <p>{{ store.address }}</p>
+                    </div>
+                    <a class="stretched-link" href="{% url 'staff' store.pk %}"></a>
+                </div>
+            </div>
+        {% empty %}
+            <p>まだ店舗がありません</p>
+        {% endfor %}
+    </div>
 </div>
-
-<h1>店舗一覧</h1>
-<ul>
-    {% for store in store_list %}
-        <li><a href="{% url 'staff_list' store.pk %}">{{ store.name }}</a></li>
-    {% empty %}
-        <li>まだ店舗がありません。</li>
-    {% endfor %}
-</ul>
 
 {% endblock %}

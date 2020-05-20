@@ -7,13 +7,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <title>カスタム認証チュートリアル</title>
+    <title>予約サイトチュートリアル</title>
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
+            <a class="navbar-brand" href="/">予約サイト</a>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="/">ホーム</a>
@@ -37,14 +39,23 @@
         </div>
     </nav>
 
-    <div class="container">
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
+    <main>
+        <div class="container">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
 
-        {% block content %}
-        {% endblock %}
-    </div>
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+    <footer class="py-2 bg-dark">
+        <p class="m-0 text-center text-white">Copyright &copy; Django Startup 2020</p>
+    </footer>
+
+    {% block extra_js %}
+    {% endblock %}
 </body>
 
 </html>

@@ -2,23 +2,45 @@
 
 {% block content %}
 
-<div class="my-5">
-    <h1>Hello World!!</h1>
-</div>
+<div class="text-center my-5">
+    <div class="row">
+        <div class="col-md-6 mb-4 text-center stafflist">
+            <img src="/{{ store_data.image.url }}" class="img-fluid" alt="">
+        </div>
 
-<h1>{{ store.name }}店 スタッフ一覧</h1>
-<ul>
-    {% for staff in staff_list %}
-        <li>
-            <a href="{% url 'calendar' staff.pk %}">
-                {{ staff.name }}
-            </a>
-        </li>
-    {% empty %}
-        <li>
-            まだスタッフがいません。
-        </li>
-    {% endfor %}
-</ul>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body px-2 py-1">
+                    <div class="p-4 text-left">
+                        <h3>{{ store_data.name }}店</h3>
+                        <hr>
+                        <p>住所：{{ store_data.address }}</p>
+                        <p>TEL：{{ store_data.tel }}</p>
+                        <p>{{ store_data.description|linebreaksbr }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-5">
+        <h1>スタッフ一覧</h1>
+    </div>
+    <div class="row">
+        {% for staff in staff_data %}
+            <div class="col-lg-3 col-md-6">
+                <div class="card img-thumbnail storelist mb-3">
+                    <img class="card-img-top card-thum" src="/{{ staff.person.image.url }}" alt="">
+                    <div class="card-body text-center px-2 py-3">
+                        <h5 class="font-weight-bold">{{ staff.person.name }}</h5>
+                    </div>
+                    <a class="stretched-link" href="{% url 'calendar' staff.pk %}"></a>
+                </div>
+            </div>
+        {% empty %}
+            <p>まだスタッフがいません</p>
+        {% endfor %}
+    </div>
+</div>
 
 {% endblock %}

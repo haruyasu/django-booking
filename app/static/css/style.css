@@ -88,3 +88,27 @@ table {
 .form-control:focus {
     box-shadow: none;
 }
+
+/* base */
+
+body {
+    display: flex;
+    flex-flow: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+/* store */
+
+.storelist img {
+    height: 150px;
+    object-fit: contain;
+}
+
+.stafflist img {
+    height: 250px;
+    object-fit: contain;
+}
