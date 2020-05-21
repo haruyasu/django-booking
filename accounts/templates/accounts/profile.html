@@ -8,6 +8,14 @@
         <table class="profile_table mb-4">
             <tbody>
                 <tr>
+                    <th class="header">プロフィール画像</th>
+                    <td class="data">
+                        {% if user_data.image %}
+                            <img src='/{{ user_data.image.url }}' width=100px>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
                     <th class="header">名前</th>
                     <td class="data">{{ user_data.first_name }} {{ user_data.last_name }}</td>
                 </tr>
@@ -16,26 +24,22 @@
                     <td class="data">{{ user_data.email }}</td>
                 </tr>
                 <tr>
-                    <th class="header">所属</th>
-                    <td class="data">{{ user_data.department }}</td>
+                    <th class="header">自己紹介</th>
+                    <td class="data">{{ user_data.description }}</td>
                 </tr>
                 <tr>
                     <th class="header">所属店舗</th>
                     <td class="data">
-                        {% for staff in staff_data %}
-                            <p><a href="{% url 'my_page_calendar' staff.pk %}">{{ staff.store.name }}</a></p>
-                        {% empty %}
-                            <p>所属がありません</p>
-                        {% endfor %}
+                        <a href="{% url 'my_page_calendar' staff_data.pk %}">{{ staff_data.store.name }}</a>
                     </td>
                 </tr>
                 <tr>
                     <th class="header">予約</th>
                     <td class="data">
                         {% for schedule in schedule_data %}
-                            <p><a href="{% url 'my_page_schedule' schedule.pk %}">{{ schedule.name }}：{{ schedule.start }}～{{ schedule.end }}</a></p>
+                            <a href="{% url 'my_page_schedule' schedule.pk %}">{{ schedule.name }}：{{ schedule.start }}～{{ schedule.end }}</a>
                         {% empty %}
-                            <p>予約がありません</p>
+                            予約がありません
                         {% endfor %}
                     </td>
                 </tr>

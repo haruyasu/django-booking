@@ -30,9 +30,9 @@
         {% for staff in staff_data %}
             <div class="col-lg-3 col-md-6">
                 <div class="card img-thumbnail storelist mb-3">
-                    <img class="card-img-top card-thum" src="/{{ staff.person.image.url }}" alt="">
+                    <img class="card-img-top card-thum" src="/{{ staff.user.image.url }}" alt="">
                     <div class="card-body text-center px-2 py-3">
-                        <h5 class="font-weight-bold">{{ staff.person.name }}</h5>
+                        <h5 class="font-weight-bold">{{ staff.user.first_name }} {{ staff.user.last_name }}</h5>
                     </div>
                     <a class="stretched-link" href="{% url 'calendar' staff.pk %}"></a>
                 </div>

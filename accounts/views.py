@@ -29,8 +29,8 @@ class LogoutView(views.LogoutView):
 class ProfileView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         user_data = CustomUser.objects.get(id=request.user.id)
-        staff_data = Staff.objects.filter(user=self.request.user).order_by('name')
-        schedule_data = Schedule.objects.filter(staff__user=self.request.user, start__gte=timezone.now()).order_by('name')
+        staff_data = Staff.objects.get(user=user_data)
+        schedule_data = Schedule.objects.filter(staff=staff_data, start__gte=timezone.now())
 
         return render(request, 'accounts/profile.html', {
             'user_data': user_data,
@@ -47,12 +47,14 @@ class ProfileEditView(LoginRequiredMixin, View):
             initial={
                 'first_name': user_data.first_name,
                 'last_name': user_data.last_name,
-                'department': user_data.department
+                'description': user_data.description,
+                'image': user_data.image
             }
         )
 
         return render(request, 'accounts/profile_edit.html', {
-            'form': form
+            'form': form,
+            'user_data': user_data
         })
 
     def post(self, request, *args, **kwargs):
@@ -61,7 +63,8 @@ class ProfileEditView(LoginRequiredMixin, View):
             user_data = CustomUser.objects.get(id=request.user.id)
             user_data.first_name = form.cleaned_data['first_name']
             user_data.last_name = form.cleaned_data['last_name']
-            user_data.department = form.cleaned_data['department']
+            user_data.description = form.cleaned_data['description']
+            user_data.image = request.FILES['image']
             user_data.save()
             return redirect('profile')
 

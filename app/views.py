@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.views import generic
 from django.views.generic import View
 from .models import Store, Staff, Schedule
+from accounts.models import CustomUser
 from django.contrib import messages
 from django.utils.timezone import make_aware
 from django.urls import reverse_lazy

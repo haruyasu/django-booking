@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from accounts.models import CustomUser
 
 
 class Store(models.Model):
@@ -14,19 +15,9 @@ class Store(models.Model):
         return self.name
 
 
-class Person(models.Model):
-    name = models.CharField('スタッフ', max_length=50)
-    description = models.TextField('説明', default="", blank=True)
-    image = models.ImageField(upload_to='images', verbose_name='イメージ画像', null=True, blank=True)
-
-    def __str__(self):
-        return self.name
-
-
 class Staff(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name='ユーザー', on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUser, verbose_name='スタッフ', on_delete=models.CASCADE)
     store = models.ForeignKey(Store, verbose_name='店舗', on_delete=models.CASCADE)
-    person = models.ForeignKey(Person, verbose_name='スタッフ', on_delete=models.CASCADE)
 
     class Meta:
         constraints = [
@@ -34,7 +25,7 @@ class Staff(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.store}：{self.person.name}'
+        return f'{self.store}：{self.user}'
 
 
 class Schedule(models.Model):
