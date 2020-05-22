@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views import generic
 from django.views.generic import View, TemplateView
-from app.models import Store, Staff, Schedule
+from app.models import Store, Staff, Booking
 from accounts.models import CustomUser
 from django.contrib import messages
 from django.utils.timezone import make_aware
@@ -61,9 +61,9 @@ class CalendarView(View):
             calendar[hour] = row
         start_time = datetime.combine(start_day, time(hour=10, minute=0, second=0))
         end_time = datetime.combine(end_day, time(hour=21, minute=0, second=0))
-        schedule_data = Schedule.objects.filter(staff=staff_data).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
-        for schedule in schedule_data:
-            local_time = timezone.localtime(schedule.start)
+        booking_data = Booking.objects.filter(staff=staff_data).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
+        for booking in booking_data:
+            local_time = timezone.localtime(booking.start)
             booking_date = local_time.date()
             booking_hour = local_time.hour
             if (booking_hour in calendar) and (booking_date in calendar[booking_hour]):
@@ -100,9 +100,6 @@ class BookingView(View):
         })
 
     def post(self, request, *args, **kwargs):
-
-        print('aaaaaaaa')
-
         staff_data = get_object_or_404(Staff, id=self.kwargs['pk'])
         year = self.kwargs.get('year')
         month = self.kwargs.get('month')
@@ -110,26 +107,22 @@ class BookingView(View):
         hour = self.kwargs.get('hour')
         start_time = datetime(year=year, month=month, day=day, hour=hour)
         end_time = datetime(year=year, month=month, day=day, hour=hour + 1)
-        schedule_data = Schedule.objects.filter(staff=staff_data, start=start_time)
-        if schedule_data.exists():
+        booking_data = Booking.objects.filter(staff=staff_data, start=start_time)
+        if booking_data.exists():
             messages.error(self.request, '既に予約があります')
         else:
             form = BookingForm(request.POST or None)
-            print('form')
             if form.is_valid():
-                print('valid')
-                schedule = Schedule()
-                schedule.staff = staff_data
-                schedule.start = start_time
-                schedule.end = end_time
-                schedule.first_name = form.cleaned_data['first_name']
-                schedule.last_name = form.cleaned_data['last_name']
-                schedule.tel = form.cleaned_data['tel']
-                schedule.remarks = form.cleaned_data['remarks']
-                schedule.save()
-                print('redirect')
+                booking = Booking()
+                booking.staff = staff_data
+                booking.start = start_time
+                booking.end = end_time
+                booking.first_name = form.cleaned_data['first_name']
+                booking.last_name = form.cleaned_data['last_name']
+                booking.tel = form.cleaned_data['tel']
+                booking.remarks = form.cleaned_data['remarks']
+                booking.save()
                 return redirect('thanks')
-        print('bad')
 
         return redirect('calendar', pk=staff_data.id, year=year, month=month, day=day)
 
@@ -165,13 +158,13 @@ class MyPageDayDetail(generic.TemplateView):
 
         start_time = datetime.combine(base_date, time(hour=9, minute=0, second=0))
         end_time = datetime.combine(base_date, time(hour=17, minute=0, second=0))
-        schedule_data = Schedule.objects.filter(staff=staff).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
-        for schedule in schedule_data:
-            local_dt = timezone.localtime(schedule.start)
+        booking_data = Booking.objects.filter(staff=staff).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
+        for booking in booking_data:
+            local_dt = timezone.localtime(booking.start)
             booking_date = local_dt.date()
             booking_hour = local_dt.hour
             if booking_hour in calendar:
-                calendar[booking_hour].append(schedule)
+                calendar[booking_hour].append(booking)
 
         context['calendar'] = calendar
         context['staff'] = staff
@@ -179,14 +172,14 @@ class MyPageDayDetail(generic.TemplateView):
 
 
 class MyPageSchedule(generic.UpdateView):
-    model = Schedule
+    model = Booking
     fields = ('start', 'end', 'name')
     success_url = reverse_lazy('profile')
-    template_name = 'app/schedule.html' 
+    template_name = 'app/booking.html' 
 
 
 class MyPageScheduleDelete(generic.DeleteView):
-    model = Schedule
+    model = Booking
     success_url = reverse_lazy('profile')
 
 
@@ -196,7 +189,7 @@ def my_page_holiday_add(request, pk, year, month, day, hour):
     if staff.user == request.user or request.user.is_superuser:
         start = datetime(year=year, month=month, day=day, hour=hour)
         end = datetime(year=year, month=month, day=day, hour=hour + 1)
-        Schedule.objects.create(staff=staff, start=start, end=end, name='休暇')
+        Booking.objects.create(staff=staff, start=start, end=end, name='休暇')
         return redirect('my_page_day_detail', pk=pk, year=year, month=month, day=day)
 
     raise PermissionDenied

@@ -28,7 +28,7 @@ class Staff(models.Model):
         return f'{self.store}：{self.user}'
 
 
-class Schedule(models.Model):
+class Booking(models.Model):
     staff = models.ForeignKey(Staff, verbose_name='スタッフ', on_delete=models.CASCADE)
     first_name = models.CharField('姓', max_length=100)
     last_name = models.CharField('名', max_length=100)
