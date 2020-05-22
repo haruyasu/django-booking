@@ -30,11 +30,14 @@ class Staff(models.Model):
 
 class Schedule(models.Model):
     staff = models.ForeignKey(Staff, verbose_name='スタッフ', on_delete=models.CASCADE)
-    name = models.CharField('予約者名', max_length=255)
+    first_name = models.CharField('姓', max_length=100)
+    last_name = models.CharField('名', max_length=100)
+    tel = models.CharField('電話番号', max_length=100)
+    remarks = models.TextField('備考', default="", blank=True)
     start = models.DateTimeField('開始時間', default=timezone.now)
     end = models.DateTimeField('終了時間', default=timezone.now)
 
     def __str__(self):
         start = timezone.localtime(self.start).strftime('%Y/%m/%d %H:%M')
         end = timezone.localtime(self.end).strftime('%Y/%m/%d %H:%M')
-        return f'{self.name} {start} ~ {end} {self.staff}'
+        return f'{self.first_name}{self.last_name} {start} ~ {end} {self.staff}'

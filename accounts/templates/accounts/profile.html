@@ -37,7 +37,9 @@
                     <th class="header">予約</th>
                     <td class="data">
                         {% for schedule in schedule_data %}
-                            <a href="{% url 'my_page_schedule' schedule.pk %}">{{ schedule.name }}：{{ schedule.start }}～{{ schedule.end }}</a>
+                            <a href="{% url 'my_page_schedule' schedule.pk %}">
+                                {{ schedule.first_name }} {{ schedule.last_name }}：{{ schedule.start }}～{{ schedule.end }}
+                            </a>
                         {% empty %}
                             予約がありません
                         {% endfor %}
