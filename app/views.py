@@ -1,7 +1,7 @@
 from datetime import datetime, date, timedelta, time
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.timezone import localtime
+from django.utils.timezone import localtime, make_aware
 from django.views.generic import View, TemplateView, DeleteView
 from app.models import Store, Staff, Booking
 from django.contrib import messages
@@ -62,8 +62,8 @@ class CalendarView(View):
             for day in days:
                 row[day] = True
             calendar[hour] = row
-        start_time = datetime.combine(start_day, time(hour=10, minute=0, second=0))
-        end_time = datetime.combine(end_day, time(hour=20, minute=0, second=0))
+        start_time = make_aware(datetime.combine(start_day, time(hour=10, minute=0, second=0)))
+        end_time = make_aware(datetime.combine(end_day, time(hour=20, minute=0, second=0)))
         booking_data = Booking.objects.filter(staff=staff_data).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
         for booking in booking_data:
             local_time = localtime(booking.start)
@@ -108,8 +108,8 @@ class BookingView(View):
         month = self.kwargs.get('month')
         day = self.kwargs.get('day')
         hour = self.kwargs.get('hour')
-        start_time = datetime(year=year, month=month, day=day, hour=hour)
-        end_time = datetime(year=year, month=month, day=day, hour=hour + 1)
+        start_time = make_aware(datetime(year=year, month=month, day=day, hour=hour))
+        end_time = make_aware(datetime(year=year, month=month, day=day, hour=hour + 1))
         booking_data = Booking.objects.filter(staff=staff_data, start=start_time)
         if booking_data.exists():
             messages.error(self.request, '既に予約があります。別の日時で予約をお願いします。')
@@ -152,8 +152,8 @@ class MyPageView(LoginRequiredMixin, View):
             for day_ in days:
                 row[day_] = ""
             calendar[hour] = row
-        start_time = datetime.combine(start_day, time(hour=10, minute=0, second=0))
-        end_time = datetime.combine(end_day, time(hour=20, minute=0, second=0))
+        start_time = make_aware(datetime.combine(start_day, time(hour=10, minute=0, second=0)))
+        end_time = make_aware(datetime.combine(end_day, time(hour=20, minute=0, second=0)))
         booking_data = Booking.objects.filter(staff=staff_data).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
         for booking in booking_data:
             local_time = localtime(booking.start)
@@ -180,8 +180,8 @@ class MyPageView(LoginRequiredMixin, View):
 @require_POST
 def Holiday(request, year, month, day, hour):
     staff_data = Staff.objects.get(id=request.user.id)
-    start_time = datetime(year=year, month=month, day=day, hour=hour)
-    end_time = datetime(year=year, month=month, day=day, hour=hour + 1)
+    start_time = make_aware(datetime(year=year, month=month, day=day, hour=hour))
+    end_time = make_aware(datetime(year=year, month=month, day=day, hour=hour + 1))
 
     # 予約追加
     Booking.objects.create(
@@ -200,7 +200,7 @@ def Holiday(request, year, month, day, hour):
 
 @require_POST
 def Delete(request, year, month, day, hour):
-    start_time = datetime(year=year, month=month, day=day, hour=hour)
+    start_time = make_aware(datetime(year=year, month=month, day=day, hour=hour))
     booking_data = Booking.objects.filter(start=start_time)
 
     # 予約削除
