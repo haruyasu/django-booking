@@ -10,5 +10,5 @@ urlpatterns = [
     path('thanks/', views.ThanksView.as_view(), name='thanks'),
     path('mypage/<int:year>/<int:month>/<int:day>/', views.MyPageView.as_view(), name='mypage'),
     path('mypage/holiday/<int:year>/<int:month>/<int:day>/<int:hour>/', views.Holiday, name='holiday'),
-    path('mypage/delete/<int:pk>/<int:year>/<int:month>/<int:day>/', views.Delete, name='delete'),
+    path('mypage/delete/<int:year>/<int:month>/<int:day>/<int:hour>/', views.Delete, name='delete'),
 ]

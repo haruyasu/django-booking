@@ -3,7 +3,7 @@
 {% block content %}
 <div class="text-center my-5">
     <div class="mb-3">
-        <h1>休暇設定</h1>
+        <h1>予約カレンダー</h1>
         <p>{{ start_day }}～{{ end_day }}</p>
     </div>
 
@@ -40,7 +40,7 @@
                         {% if book == "" %}
                             <form method="POST" action="{% url 'holiday' datetime.year datetime.month datetime.day booking_hour %}">
                                 {% csrf_token %}
-                                <button class="btn btn-light" type="submit">休暇</button>
+                                <button class="btn btn-light" type="submit">出勤</button>
                             </form>
                         {% else %}
                             {% if book == None %}
@@ -48,7 +48,7 @@
                             {% else %}
                                 <p class="mb-0 font-weight-bold text-success">{{ book }}様</p>
                             {% endif %}
-                            <form method="POST" action="{% url 'holiday' datetime.year datetime.month datetime.day booking_hour %}">
+                            <form method="POST" action="{% url 'delete' datetime.year datetime.month datetime.day booking_hour %}">
                                 {% csrf_token %}
                                 <button class="btn btn-danger" type="submit">取消</button>
                             </form>
@@ -63,16 +63,16 @@
 
     <div class="row">
         <div class="col-md-3 mb-4 text-center mypage">
-            <img src="/{{ staff_data.user.image.url }}" class="img-fluid" alt="">
+            <img class="mb-3" src="/{{ staff_data.user.image.url }}" class="img-fluid" alt="">
+            <p>{{ staff_data.store.name }}店：{{ staff_data.user.first_name }} {{ staff_data.user.last_name }}</p>
         </div>
 
         <div class="col-md-9 mb-4">
             <div class="card">
                 <div class="card-body px-2 py-1">
                     <div class="p-4 text-left">
-                        <h3>{{ staff_data.store.name }}店：{{ staff_data.user.first_name }} {{ staff_data.user.last_name }}</h3>
+                        <h3>今週の予約</h3>
                         <hr>
-                        <h4>今週の予約</h4>
                         <table class="table">
                             <thead class="thead-light">
                                 <tr>
@@ -90,8 +90,6 @@
                                             <td>{{ booking.end }}</td>
                                         </tr>
                                     {% endif %}
-                                {% empty %}
-                                    <p>予約がありません</p>
                                 {% endfor %}                
                             </tbody>
                         </table>
