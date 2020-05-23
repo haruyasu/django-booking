@@ -1,7 +1,7 @@
 from datetime import datetime, date, timedelta, time
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
+from django.utils.timezone import localtime
 from django.views.generic import View, TemplateView, DeleteView
 from app.models import Store, Staff, Booking
 from django.contrib import messages
@@ -66,7 +66,7 @@ class CalendarView(View):
         end_time = datetime.combine(end_day, time(hour=20, minute=0, second=0))
         booking_data = Booking.objects.filter(staff=staff_data).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
         for booking in booking_data:
-            local_time = timezone.localtime(booking.start)
+            local_time = localtime(booking.start)
             booking_date = local_time.date()
             booking_hour = local_time.hour
             if (booking_hour in calendar) and (booking_date in calendar[booking_hour]):
@@ -156,7 +156,7 @@ class MyPageView(LoginRequiredMixin, View):
         end_time = datetime.combine(end_day, time(hour=20, minute=0, second=0))
         booking_data = Booking.objects.filter(staff=staff_data).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
         for booking in booking_data:
-            local_time = timezone.localtime(booking.start)
+            local_time = localtime(booking.start)
             booking_date = local_time.date()
             booking_hour = local_time.hour
             if (booking_hour in calendar) and (booking_date in calendar[booking_hour]):

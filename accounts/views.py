@@ -64,7 +64,8 @@ class ProfileEditView(LoginRequiredMixin, View):
             user_data.first_name = form.cleaned_data['first_name']
             user_data.last_name = form.cleaned_data['last_name']
             user_data.description = form.cleaned_data['description']
-            user_data.image = request.FILES['image']
+            if request.FILES.get('image'):
+                user_data.image = request.FILES.get('image')
             user_data.save()
             return redirect('profile')
 
