@@ -27,24 +27,6 @@
                     <th class="header">自己紹介</th>
                     <td class="data">{{ user_data.description }}</td>
                 </tr>
-                <tr>
-                    <th class="header">所属店舗</th>
-                    <td class="data">
-                        <a href="{% url 'my_page_calendar' staff_data.pk %}">{{ staff_data.store.name }}</a>
-                    </td>
-                </tr>
-                <tr>
-                    <th class="header">予約</th>
-                    <td class="data">
-                        {% for booking in booking_data %}
-                            <a href="{% url 'my_page_schedule' booking.pk %}">
-                                {{ booking.first_name }} {{ booking.last_name }}：{{ booking.start }}～{{ booking.end }}
-                            </a>
-                        {% empty %}
-                            予約がありません
-                        {% endfor %}
-                    </td>
-                </tr>
             </tbody>
         </table>
         <div class="button mx-auto">

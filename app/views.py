@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views import generic
-from django.views.generic import View, TemplateView
+from django.views.generic import View, TemplateView, DeleteView
 from app.models import Store, Staff, Booking
 from accounts.models import CustomUser
 from django.contrib import messages
@@ -13,10 +13,19 @@ from django.urls import reverse_lazy
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
 from app.forms import BookingForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 class StoreView(View):
     def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            today = date.today()
+            weekday = today.weekday()
+            # 日曜日から
+            if weekday != 6:
+                start_date = today - timedelta(days=weekday + 1)
+            return redirect('mypage', start_date.year, start_date.month, start_date.day)
+
         store_data = Store.objects.all()
 
         return render(request, 'app/store.html', {
@@ -53,14 +62,14 @@ class CalendarView(View):
         end_day = days[-1]
 
         calendar = {}
-        # 10時～21時
-        for hour in range(10, 22):
+        # 10時～20時
+        for hour in range(10, 21):
             row = {}
             for day in days:
                 row[day] = True
             calendar[hour] = row
         start_time = datetime.combine(start_day, time(hour=10, minute=0, second=0))
-        end_time = datetime.combine(end_day, time(hour=21, minute=0, second=0))
+        end_time = datetime.combine(end_day, time(hour=20, minute=0, second=0))
         booking_data = Booking.objects.filter(staff=staff_data).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
         for booking in booking_data:
             local_time = timezone.localtime(booking.start)
@@ -131,65 +140,77 @@ class ThanksView(TemplateView):
     template_name = 'app/thanks.html'
 
 
-
-
-
-
-
-class MyPageCalendar(CalendarView):
-    template_name = 'app/mycalendar.html'
-
-
-class MyPageDayDetail(generic.TemplateView):
-    template_name = 'app/detail.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        pk = self.kwargs['pk']
-        staff = get_object_or_404(Staff, pk=pk)
+class MyPageView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        staff_data = Staff.objects.get(id=request.user.id)
         year = self.kwargs.get('year')
         month = self.kwargs.get('month')
         day = self.kwargs.get('day')
-        base_date = date(year=year, month=month, day=day)
+        start_date = date(year=year, month=month, day=day)
+        days = [start_date + timedelta(days=day) for day in range(7)]
+        start_day = days[0]
+        end_day = days[-1]
 
         calendar = {}
-        for hour in range(9, 18):
-            calendar[hour] = []
-
-        start_time = datetime.combine(base_date, time(hour=9, minute=0, second=0))
-        end_time = datetime.combine(base_date, time(hour=17, minute=0, second=0))
-        booking_data = Booking.objects.filter(staff=staff).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
+        # 10時～20時
+        for hour in range(10, 21):
+            row = {}
+            for day_ in days:
+                row[day_] = ""
+            calendar[hour] = row
+        start_time = datetime.combine(start_day, time(hour=10, minute=0, second=0))
+        end_time = datetime.combine(end_day, time(hour=20, minute=0, second=0))
+        booking_data = Booking.objects.filter(staff=staff_data).exclude(Q(start__gt=end_time) | Q(end__lt=start_time))
         for booking in booking_data:
-            local_dt = timezone.localtime(booking.start)
-            booking_date = local_dt.date()
-            booking_hour = local_dt.hour
-            if booking_hour in calendar:
-                calendar[booking_hour].append(booking)
+            local_time = timezone.localtime(booking.start)
+            booking_date = local_time.date()
+            booking_hour = local_time.hour
+            if (booking_hour in calendar) and (booking_date in calendar[booking_hour]):
+                calendar[booking_hour][booking_date] = booking.first_name
 
-        context['calendar'] = calendar
-        context['staff'] = staff
-        return context
-
-
-class MyPageSchedule(generic.UpdateView):
-    model = Booking
-    fields = ('start', 'end', 'name')
-    success_url = reverse_lazy('profile')
-    template_name = 'app/booking.html' 
-
-
-class MyPageScheduleDelete(generic.DeleteView):
-    model = Booking
-    success_url = reverse_lazy('profile')
+        return render(request, 'app/mypage.html', {
+            'staff_data': staff_data,
+            'booking_data': booking_data,
+            'calendar': calendar,
+            'days': days,
+            'start_day': start_day,
+            'end_day': end_day,
+            'before': days[0] - timedelta(days=7),
+            'next': days[-1] + timedelta(days=1),
+            'year': year,
+            'month': month,
+            'day': day,
+        })
 
 
 @require_POST
-def my_page_holiday_add(request, pk, year, month, day, hour):
-    staff = get_object_or_404(Staff, pk=pk)
-    if staff.user == request.user or request.user.is_superuser:
-        start = datetime(year=year, month=month, day=day, hour=hour)
-        end = datetime(year=year, month=month, day=day, hour=hour + 1)
-        Booking.objects.create(staff=staff, start=start, end=end, name='休暇')
-        return redirect('my_page_day_detail', pk=pk, year=year, month=month, day=day)
+def Holiday(request, year, month, day, hour):
+    staff_data = Staff.objects.get(id=request.user.id)
+    start_time = datetime(year=year, month=month, day=day, hour=hour)
+    end_time = datetime(year=year, month=month, day=day, hour=hour + 1)
 
-    raise PermissionDenied
+    Booking.objects.create(
+        staff=staff_data,
+        start=start_time,
+        end=end_time,
+    )
+
+    start_date = date(year=year, month=month, day=day)
+    weekday = start_date.weekday()
+    # 日曜日から
+    if weekday != 6:
+        start_date = start_date - timedelta(days=weekday + 1)
+    return redirect('mypage', year=start_date.year, month=start_date.month, day=start_date.day)
+
+
+@require_POST
+def Delete(request, pk, year, month, day):
+    booking_data = Booking.objects.get(id=pk)
+    booking_data.delete()
+
+    start_date = date(year=year, month=month, day=day)
+    weekday = start_date.weekday()
+    # 日曜日から
+    if weekday != 6:
+        start_date = start_date - timedelta(days=weekday + 1)
+    return redirect('mypage', year=start_date.year, month=start_date.month, day=start_date.day)

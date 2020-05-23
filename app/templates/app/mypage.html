@@ -1,0 +1,104 @@
+{% extends "app/base.html" %}
+
+{% block content %}
+<div class="text-center my-5">
+    <div class="mb-3">
+        <h1>休暇設定</h1>
+        <p>{{ start_day }}～{{ end_day }}</p>
+    </div>
+
+    <div class="d-flex mb-2">
+        <div class="mx-3 mr-auto">
+            <a class="btn btn-warning" href="{% url 'mypage' before.year before.month before.day %}">前週</a>
+        </div>
+        <div class="mx-3">
+            <a class="btn btn-warning" href="{% url 'mypage' next.year next.month next.day %}">次週</a>
+        </div>
+    </div>
+    <div class="mb-3">
+        <table class="table table-bordered bg-light">
+            <thead class="thead-light">
+                <tr>
+                    <th></th>
+                    {% for day in days %}
+                        {% if day.weekday == 5 %}
+                            <th scope="col" class="text-primary">{{ day | date:"d(D)" }}</th>
+                        {% elif day.weekday == 6 %}
+                            <th scope="col" class="text-danger">{{ day | date:"d(D)" }}</th>
+                        {% else %}
+                            <th scope="col">{{ day | date:"d(D)" }}</th>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking_hour, booking_date in calendar.items %}
+                <tr>
+                    <td scope="row">{{ booking_hour }}:00</td>
+                    {% for datetime, book in booking_date.items %}
+                    <td>
+                        {% if book == "" %}
+                            <form method="POST" action="{% url 'holiday' datetime.year datetime.month datetime.day booking_hour %}">
+                                {% csrf_token %}
+                                <button class="btn btn-light" type="submit">休暇</button>
+                            </form>
+                        {% else %}
+                            {% if book == None %}
+                                <p class="mb-0">休み</p>
+                            {% else %}
+                                <p class="mb-0 font-weight-bold text-success">{{ book }}様</p>
+                            {% endif %}
+                            <form method="POST" action="{% url 'holiday' datetime.year datetime.month datetime.day booking_hour %}">
+                                {% csrf_token %}
+                                <button class="btn btn-danger" type="submit">取消</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 mb-4 text-center mypage">
+            <img src="/{{ staff_data.user.image.url }}" class="img-fluid" alt="">
+        </div>
+
+        <div class="col-md-9 mb-4">
+            <div class="card">
+                <div class="card-body px-2 py-1">
+                    <div class="p-4 text-left">
+                        <h3>{{ staff_data.store.name }}店：{{ staff_data.user.first_name }} {{ staff_data.user.last_name }}</h3>
+                        <hr>
+                        <h4>今週の予約</h4>
+                        <table class="table">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>お客様</th>
+                                    <th>開始時刻</th>
+                                    <th>終了時刻</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in booking_data %}
+                                    {% if booking.first_name != None %}
+                                        <tr>
+                                            <td>{{ booking.first_name }} {{ booking.last_name }}様</td>
+                                            <td>{{ booking.start }}</td>
+                                            <td>{{ booking.end }}</td>
+                                        </tr>
+                                    {% endif %}
+                                {% empty %}
+                                    <p>予約がありません</p>
+                                {% endfor %}                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

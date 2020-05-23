@@ -30,9 +30,9 @@ class Staff(models.Model):
 
 class Booking(models.Model):
     staff = models.ForeignKey(Staff, verbose_name='スタッフ', on_delete=models.CASCADE)
-    first_name = models.CharField('姓', max_length=100)
-    last_name = models.CharField('名', max_length=100)
-    tel = models.CharField('電話番号', max_length=100)
+    first_name = models.CharField('姓', max_length=100, null=True, blank=True)
+    last_name = models.CharField('名', max_length=100, null=True, blank=True)
+    tel = models.CharField('電話番号', max_length=100, null=True, blank=True)
     remarks = models.TextField('備考', default="", blank=True)
     start = models.DateTimeField('開始時間', default=timezone.now)
     end = models.DateTimeField('終了時間', default=timezone.now)
