@@ -2,9 +2,8 @@ from datetime import datetime, date, timedelta, time
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.timezone import localtime, make_aware
-from django.views.generic import View, TemplateView, DeleteView
+from django.views.generic import View, TemplateView
 from app.models import Store, Staff, Booking
-from django.contrib import messages
 from django.views.decorators.http import require_POST
 from app.forms import BookingForm
 from django.contrib.auth.mixins import LoginRequiredMixin
