@@ -13,11 +13,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 class StoreView(View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            today = date.today()
-            weekday = today.weekday()
+            start_date = date.today()
+            weekday = start_date.weekday()
             # カレンダー日曜日開始
             if weekday != 6:
-                start_date = today - timedelta(days=weekday + 1)
+                start_date = start_date - timedelta(days=weekday + 1)
             return redirect('mypage', start_date.year, start_date.month, start_date.day)
 
         store_data = Store.objects.all()
@@ -30,7 +30,7 @@ class StoreView(View):
 class StaffView(View):
     def get(self, request, *args, **kwargs):
         store_data = get_object_or_404(Store, id=self.kwargs['pk'])
-        staff_data = Staff.objects.filter(store=store_data)
+        staff_data = Staff.objects.filter(store=store_data).select_related('user')
 
         return render(request, 'app/staff.html', {
             'store_data': store_data,
@@ -40,7 +40,8 @@ class StaffView(View):
 
 class CalendarView(View):
     def get(self, request, *args, **kwargs):
-        staff_data = get_object_or_404(Staff, id=self.kwargs['pk'])
+        # staff_data = get_object_or_404(Staff, id=self.kwargs['pk'])
+        staff_data = Staff.objects.filter(id=self.kwargs['pk']).select_related('user').select_related('store')[0]
         today = date.today()
         year = self.kwargs.get('year')
         month = self.kwargs.get('month')
@@ -86,7 +87,7 @@ class CalendarView(View):
 
 class BookingView(View):
     def get(self, request, *args, **kwargs):
-        staff_data = get_object_or_404(Staff, id=self.kwargs['pk'])
+        staff_data = Staff.objects.filter(id=self.kwargs['pk']).select_related('user').select_related('store')[0]
         year = self.kwargs.get('year')
         month = self.kwargs.get('month')
         day = self.kwargs.get('day')
@@ -136,7 +137,7 @@ class ThanksView(TemplateView):
 
 class MyPageView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        staff_data = Staff.objects.get(id=request.user.id)
+        staff_data = Staff.objects.filter(id=request.user.id).select_related('user').select_related('store')[0]
         year = self.kwargs.get('year')
         month = self.kwargs.get('month')
         day = self.kwargs.get('day')
