@@ -40,7 +40,6 @@ class StaffView(View):
 
 class CalendarView(View):
     def get(self, request, *args, **kwargs):
-        # staff_data = get_object_or_404(Staff, id=self.kwargs['pk'])
         staff_data = Staff.objects.filter(id=self.kwargs['pk']).select_related('user').select_related('store')[0]
         today = date.today()
         year = self.kwargs.get('year')
@@ -112,10 +111,10 @@ class BookingView(View):
         start_time = make_aware(datetime(year=year, month=month, day=day, hour=hour))
         end_time = make_aware(datetime(year=year, month=month, day=day, hour=hour + 1))
         booking_data = Booking.objects.filter(staff=staff_data, start=start_time)
+        form = BookingForm(request.POST or None)
         if booking_data.exists():
-            messages.error(self.request, '既に予約があります。別の日時で予約をお願いします。')
+            form.add_error(None, '既に予約があります。\n別の日時で予約をお願いします。')
         else:
-            form = BookingForm(request.POST or None)
             if form.is_valid():
                 booking = Booking()
                 booking.staff = staff_data
@@ -128,8 +127,14 @@ class BookingView(View):
                 booking.save()
                 return redirect('thanks')
 
-        return redirect('calendar', pk=staff_data.id, year=year, month=month, day=day)
-
+        return render(request, 'app/booking.html', {
+            'staff_data': staff_data,
+            'year': year,
+            'month': month,
+            'day': day,
+            'hour': hour,
+            'form': form,
+        })
 
 class ThanksView(TemplateView):
     template_name = 'app/thanks.html'

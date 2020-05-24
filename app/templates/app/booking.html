@@ -17,7 +17,12 @@
                 </tr>
                 <tr>
                     <th class="header">日程</th>
-                    <td class="data">{{ year }}年{{ month }}月{{ day }}日 {{ hour }}:00</td>
+                    <td class="data">
+                        {% for error in form.non_field_errors %}
+                            <h5 class="text-danger">{{ error|linebreaksbr }}</h5>
+                        {% endfor %}
+                        {{ year }}年{{ month }}月{{ day }}日 {{ hour }}:00
+                    </td>
                 </tr>
             </tbody>
         </table>
