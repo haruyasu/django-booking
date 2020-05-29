@@ -1,1 +1,1 @@
-# djagno-booking
+# Django Booking
